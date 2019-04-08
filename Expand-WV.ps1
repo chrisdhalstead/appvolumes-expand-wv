@@ -27,52 +27,71 @@
 #---------------------------------------------------------[Initialize]--------------------------------------------------------
 
 #Set Error Action to Silently Continue
-$ErrorActionPreference = "SilentlyContinue"
+#$ErrorActionPreference = "SilentlyContinue"
 
 #----------------------------------------------------------[Declarations]----------------------------------------------------------
-
-#Script Version
-$sScriptVersion = "1.0"
-
 #Log File Info
-$sLogPath = "C:\Windows\Temp"
-$sLogName = "<script_name>.log"
+$sLogPath = $env:TEMP 
+$sDomain = $env:USERDOMAIN
+$sUser = $env:USERNAME
+$sComputer = $env:COMPUTERNAME
+$sLogName = "expand-wv.log"
 $sLogFile = Join-Path -Path $sLogPath -ChildPath $sLogName
+$sLogTitle = "Starting Script as $sdomain\$sUser from $scomputer***************"
+Add-Content $sLogFile -Value $sLogTitle
+
+$Credentials = @{
+  username = 'vmweuc\chalstead'
+  password = 'Sp**dR@cer19'
+}
+$json = $Credentials | ConvertTo-Json
+
+$sAVSession = ""
+$sAppVolumesServer = "s1-avm1.vmweuc.com"
 
 #-----------------------------------------------------------[Functions]------------------------------------------------------------
 
-<#
+<
 
-Function <FunctionName>{
-  Param()
-  
-  Begin{
-    Log-Write -LogPath $sLogFile -LineValue "<description of what is going on>..."
-  }
-  
-  Process{
-    Try{
-      <code goes here>
-    }
+Function Write-Log {
+    [CmdletBinding()]
+    Param(
     
-    Catch{
-      Log-Error -LogPath $sLogFile -ErrorDesc $_.Exception -ExitGracefully $True
-      Break
+    [Parameter(Mandatory=$False)]
+    [ValidateSet("INFO","WARN","ERROR","FATAL","DEBUG")]
+    [String]
+    $Level = "INFO",
+
+    [Parameter(Mandatory=$True)]
+    [string]
+    $Message
+
+    )
+
+    $Stamp = (Get-Date).toString("yyyy/MM/dd HH:mm:ss")
+    $Line = "$Stamp $Level $Message"
+    Add-Content $sLogFile -Value $Line
+   
     }
-  }
-  
-  End{
-    If($?){
-      Log-Write -LogPath $sLogFile -LineValue "Completed Successfully."
-      Log-Write -LogPath $sLogFile -LineValue " "
-    }
-  }
+
+
+>
+
+Function AV_Logon {
+
+$response = Invoke-RestMethod -uri 'https://s1-avm1.vmweuc.com/cv_api/sessions' -Method Post -Body $json -ContentType 'application/json'
+
+Write-Log -Message "Logging on to AppVolumes" $response
+
 }
 
-#>
+
+
+
 
 #-----------------------------------------------------------[Execution]------------------------------------------------------------
 
-#Log-Start -LogPath $sLogPath -LogName $sLogName -ScriptVersion $sScriptVersion
-#Script Execution goes here
-#Log-Finish -LogPath $sLogFile
+$response = Invoke-RestMethod -uri 'https://s1-avm1.vmweuc.com/cv_api/sessions' -SessionVariable $ssession -Method Post -Body $json -ContentType 'application/json'
+
+
+Add-Content $sLogFile -Value "Finishing Script******************************************************"
