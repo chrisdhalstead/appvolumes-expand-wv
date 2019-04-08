@@ -133,20 +133,27 @@ $json = $sgetwv.datastores.writable_volumes
     foreach ($item in $json)
     {
 
-    Write-Host $item.id $item.name $item.total_mb $item.attached
-
     If ($Update_WV_Size -eq "YES") {
           
       $avid = $item.id
-      Write-Host "Update Sizes"
       try{$supdatesize = Invoke-RestMethod -WebSession $avsession -Method Post -Uri "https://$AppVolumesServerFQDN/cv_api/writables/grow?bg=0&size_mb=$New_Size_In_MB&volumes%5B%5D=$avid" -ContentType 'application/json'}
       catch {
         Write-Host "An error occurred when increasing size $_"
       }
-      write-host $supdatesize
+      if ($supdatesize.successes.Count -gt 0)
+        {Write-Host $supdatesize.successes}
+      if ($supdatesize.warnings.Count -gt 0)
+        {Write-Host $supdatesize.warnings}
+      if ($supdatesize.errors.Count -gt 0)
+        {Write-Host $supdatesize.errors}
+       }   else {
+     
+        Write-Host $item.id $item.name $item.total_mb $item.attached 
+    
+        }
 
-      }  
     }
+   
 
 
   } 
