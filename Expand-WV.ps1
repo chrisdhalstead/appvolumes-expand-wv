@@ -1,18 +1,12 @@
 <#
 .SYNOPSIS
-  <Overview of script>
-
-.DESCRIPTION
-  <Brief description of script>
-
-.PARAMETER <Parameter_Name>
-    <Brief description of parameter input required. Repeat this attribute if required>
+  Script to update
 
 .INPUTS
-  <Inputs if any, otherwise state None>
+  Parameters Below
 
 .OUTPUTS
-  <Outputs if any, otherwise state None - example: Log file stored in C:\Windows\Temp\<name>.log>
+  Log file stored in C:\Windows\Temp\<name>.log>
 
 .NOTES
   Version:        1.0
@@ -21,33 +15,31 @@
   Purpose/Change: Initial script development
   
 .EXAMPLE
- .\Tag-SCCM-Collections.ps1 `
-        -SCCMCollectionName "All"
-        -AirwatchServer "https://airwatch.company.com" `
-        -AirwatchUser "Username" `
-        -AirwatchPW "SecurePassword" `
-        -AirwatchAPIKey "iVvHQnSXpX5elicaZPaIlQ8hCe5C/kw21K3glhZ+g/g=" `
-        -AWOrganizationGroupName "myogname" `
+ .\Expand-WV.ps1 
+        -AppVolumesServerFQDN "avmanager.company.com"
+        -AppVolumesDomain "mydomain" 
+        -AppVolumesUser "Username" 
+        -AppVolumesPassword "SecurePassword" 
+        -New_Size_In_MB "40960" 
+        -Update_WV_Size "yes" 
 
-    .PARAMETER SCCMCollectionName
-    The name of the SCCM Collection which you want to create a tag for.  Devices in the colelctions which exist in Airwatch will be tagged with the collection name. 
-    Input All for all Device collections in SCCM.
+    .PARAMETER AppVolumesServerFQDN
+    The FQDN of the App Volumes Manager where you want to view / change the Writable Volumes
 
-    .PARAMETER AirwatchServer
-    Server URL for the AirWatch API Server
+    .PARAMETER AppVolumesDomain
+    Active Directory Domain of the user with Administrative access
 
-    .PARAMETER AirwatchUser
-    An AirWatch account in the tenant is being queried.  This user must have the API role at a minimum.
+    .PARAMETER AppVolumesUser
+    Active Directoty User with administrative access
 
-    .PARAMETER AirwatchPW
+    .PARAMETER AppVolumesPassword
     The password that is used by the user specified in the username parameter
 
-    .PARAMETER AirwatchAPIKey
-    This is the REST API key that is generated in the AirWatch Console.  You locate this key at All Settings -> Advanced -> API -> REST,
-    and you will find the key in the API Key field.  If it is not there you may need override the settings and Enable API Access
+    .PARAMETER New_Size_In_MB
+    New size for the writable volumes in Megabytes. Take gigabytes and mutliply by 1024.
 
-    .PARAMETER AWOrganizationGroupName
-    The name of the Organization Group where the device will be registered. 
+    .PARAMETER Update_WV_Size
+    Enter yes to update the sizes.  Type anything else for a list of writable volumes.
 #>
 
 [CmdletBinding()]
