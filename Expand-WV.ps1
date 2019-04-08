@@ -21,13 +21,57 @@
   Purpose/Change: Initial script development
   
 .EXAMPLE
-  <Example goes here. Repeat this attribute for more than one example>
+ .\Tag-SCCM-Collections.ps1 `
+        -SCCMCollectionName "All"
+        -AirwatchServer "https://airwatch.company.com" `
+        -AirwatchUser "Username" `
+        -AirwatchPW "SecurePassword" `
+        -AirwatchAPIKey "iVvHQnSXpX5elicaZPaIlQ8hCe5C/kw21K3glhZ+g/g=" `
+        -AWOrganizationGroupName "myogname" `
+
+    .PARAMETER SCCMCollectionName
+    The name of the SCCM Collection which you want to create a tag for.  Devices in the colelctions which exist in Airwatch will be tagged with the collection name. 
+    Input All for all Device collections in SCCM.
+
+    .PARAMETER AirwatchServer
+    Server URL for the AirWatch API Server
+
+    .PARAMETER AirwatchUser
+    An AirWatch account in the tenant is being queried.  This user must have the API role at a minimum.
+
+    .PARAMETER AirwatchPW
+    The password that is used by the user specified in the username parameter
+
+    .PARAMETER AirwatchAPIKey
+    This is the REST API key that is generated in the AirWatch Console.  You locate this key at All Settings -> Advanced -> API -> REST,
+    and you will find the key in the API Key field.  If it is not there you may need override the settings and Enable API Access
+
+    .PARAMETER AWOrganizationGroupName
+    The name of the Organization Group where the device will be registered. 
 #>
 
-#---------------------------------------------------------[Initialize]--------------------------------------------------------
+[CmdletBinding()]
+    Param(
 
-#Set Error Action to Silently Continue
-#$ErrorActionPreference = "SilentlyContinue"
+        [Parameter(Mandatory=$True)]
+        [string]$AppVolumesServerFQDN,
+           
+        [Parameter(Mandatory=$True)]
+        [string]$AppVolumesDomain,
+
+        [Parameter(Mandatory=$True)]
+        [string]$AppVolumesUser,
+
+        [Parameter(Mandatory=$True)]
+        [securestring]$AppVolumesPassword,
+       
+        [Parameter(Mandatory=$true)]
+        [string]$New_Size_In_MB,
+
+        [Parameter(Mandatory=$true)]
+        [string]$Update_WV_Size
+
+)
 
 #----------------------------------------------------------[Declarations]----------------------------------------------------------
 #Log File Info
@@ -41,14 +85,13 @@ $sLogTitle = "Starting Script as $sdomain\$sUser from $scomputer***************"
 Add-Content $sLogFile -Value $sLogTitle
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-$cookiejar = New-Object System.Net.CookieContainer 
-
+$BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($AppVolumesPassword)
+$UnsecurePassword = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
 
 $Credentials = @{
-  username = 'vmweuc\chalstead'
-  password = 'Sp**dR@cer19'
+  username = "$AppVolumesDomain\$appvolumesuser"
+  password = $UnsecurePassword
 }
-$sAppVolumesServer = "s1-avm1.vmweuc.com"
 
 #-----------------------------------------------------------[Functions]------------------------------------------------------------
 Function Write-Log {
@@ -73,27 +116,41 @@ Function Write-Log {
 
 Function Connect_AV {
 
-try{$sresult = Invoke-RestMethod -Method Post -Uri "https://s1-avm.vmweuc.com/cv_api/sessions" -Body $Credentials -SessionVariable avsession}
+Write-Host "Logging on to App Volumes Manager"
+try{$sresult = Invoke-RestMethod -Method Post -Uri "https://$AppVolumesServerFQDN/cv_api/sessions" -Body $Credentials -SessionVariable avsession}
 catch {
-  Write-Host "An error occurred when logging on"
+  Write-Host "An error occurred when logging on $_"
   Add-Content $sLogFile -Value "Error when logging on to AppVolumes Manager: $_"
   Add-Content $sLogFile -Value "Finishing Script******************************************************"
   exit 
 }
 
 Add-Content $sLogFile -Value "Logging on to AppVolumes Manager: $sresult"
-$sgetwv = Invoke-RestMethod -WebSession $avsession -Method Get -Uri "https://s1-avm.vmweuc.com/cv_api/writables" -ContentType 'application/json' 
+$sgetwv = Invoke-RestMethod -WebSession $avsession -Method Get -Uri "https://$AppVolumesServerFQDN/cv_api/writables" -ContentType 'application/json'
 
 $json = $sgetwv.datastores.writable_volumes
 
-foreach ($name in $json.name)
-{
-  Write-Host $name
-}
+    foreach ($item in $json)
+    {
+
+    Write-Host $item.id $item.name $item.total_mb $item.attached
+
+    If ($Update_WV_Size -eq "YES") {
+          
+      $avid = $item.id
+      Write-Host "Update Sizes"
+      try{$supdatesize = Invoke-RestMethod -WebSession $avsession -Method Post -Uri "https://$AppVolumesServerFQDN/cv_api/writables/grow?bg=0&size_mb=$New_Size_In_MB&volumes%5B%5D=$avid" -ContentType 'application/json'}
+      catch {
+        Write-Host "An error occurred when increasing size $_"
+      }
+      write-host $supdatesize
+
+      }  
+    }
 
 
+  } 
 
-}
 
 #-----------------------------------------------------------[Execution]------------------------------------------------------------
 #Logon to App Volumes
