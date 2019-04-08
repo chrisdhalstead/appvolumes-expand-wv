@@ -39,20 +39,18 @@ $sLogName = "expand-wv.log"
 $sLogFile = Join-Path -Path $sLogPath -ChildPath $sLogName
 $sLogTitle = "Starting Script as $sdomain\$sUser from $scomputer***************"
 Add-Content $sLogFile -Value $sLogTitle
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+$cookiejar = New-Object System.Net.CookieContainer 
+
 
 $Credentials = @{
   username = 'vmweuc\chalstead'
   password = 'Sp**dR@cer19'
 }
-$json = $Credentials | ConvertTo-Json
-
-$sAVSession = ""
 $sAppVolumesServer = "s1-avm1.vmweuc.com"
 
 #-----------------------------------------------------------[Functions]------------------------------------------------------------
-
-<
-
 Function Write-Log {
     [CmdletBinding()]
     Param(
@@ -67,31 +65,38 @@ Function Write-Log {
     $Message
 
     )
-
     $Stamp = (Get-Date).toString("yyyy/MM/dd HH:mm:ss")
     $Line = "$Stamp $Level $Message"
     Add-Content $sLogFile -Value $Line
    
     }
 
+Function Connect_AV {
 
->
+try{$sresult = Invoke-RestMethod -Method Post -Uri "https://s1-avm.vmweuc.com/cv_api/sessions" -Body $Credentials -SessionVariable avsession}
+catch {
+  Write-Host "An error occurred when logging on"
+  Add-Content $sLogFile -Value "Error when logging on to AppVolumes Manager: $_"
+  Add-Content $sLogFile -Value "Finishing Script******************************************************"
+  exit 
+}
 
-Function AV_Logon {
+Add-Content $sLogFile -Value "Logging on to AppVolumes Manager: $sresult"
+$sgetwv = Invoke-RestMethod -WebSession $avsession -Method Get -Uri "https://s1-avm.vmweuc.com/cv_api/writables" -ContentType 'application/json' 
 
-$response = Invoke-RestMethod -uri 'https://s1-avm1.vmweuc.com/cv_api/sessions' -Method Post -Body $json -ContentType 'application/json'
+$json = $sgetwv.datastores.writable_volumes
 
-Write-Log -Message "Logging on to AppVolumes" $response
-
+foreach ($name in $json.name)
+{
+  Write-Host $name
 }
 
 
 
-
+}
 
 #-----------------------------------------------------------[Execution]------------------------------------------------------------
-
-$response = Invoke-RestMethod -uri 'https://s1-avm1.vmweuc.com/cv_api/sessions' -SessionVariable $ssession -Method Post -Body $json -ContentType 'application/json'
-
+#Logon to App Volumes
+Connect_AV
 
 Add-Content $sLogFile -Value "Finishing Script******************************************************"
