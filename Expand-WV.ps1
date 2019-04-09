@@ -145,8 +145,10 @@ $json = $sgetwv.datastores.writable_volumes
         }
        }   else {
      
-        Write-Host $item.name $item.total_mb $item.percent_available $item.attached 
-        Add-Content -path $sLogFile -value "$item.name $item.total_mb $item.percent_available $item.attached"
+        $swvs = $item.name + $item.total_mb + $item.percent_available + $item.attached
+
+        Write-Host $swvs
+        Write-Log -Message $swvs
         }
 
     }
