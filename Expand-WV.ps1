@@ -38,7 +38,7 @@
     The password that is used by the user specified in the username parameter
 
     .PARAMETER New_Size_In_MB
-    New size for the writable volumes in Megabytes. Take gigabytes and mutliply by 1024.
+    New size for the writable volumes in Megabytes. Take gigabytes and mutltiply by 1024.
 
     .PARAMETER Update_WV_Size
     Enter yes to update the sizes.  Type anything else for a list of writable volumes.
