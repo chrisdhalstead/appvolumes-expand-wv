@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
-  Script to update
-
+  Script to update the size of VMware App Volumes Writable Volumes.  Can also be used to view sizes of volumes.
+	
 .INPUTS
   Parameters Below
 
@@ -13,6 +13,8 @@
   Author:         Chris Halstead - chalstead@vmware.com
   Creation Date:  4/8/2019
   Purpose/Change: Initial script development
+  **This script and the App Volumes API is not supported by VMware**
+  New sizes won't be reflected until a user logs in and attaches the Writable Volume	
   
 .EXAMPLE
  .\Expand-WV.ps1 
