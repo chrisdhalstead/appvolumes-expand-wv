@@ -1,5 +1,5 @@
 # appvolumes-expand-wv
-Batch Expand VMware App Volumes Writable Volumes
+Batch Expand Size of VMware App Volumes Writable Volumes
 
 .INPUTS
   Parameters Below
