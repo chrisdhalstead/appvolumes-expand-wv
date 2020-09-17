@@ -8,12 +8,20 @@ Batch Expand VMware App Volumes Writable Volumes
   Log file stored in %temp%\expand-wv.log>
 
 .NOTES
-  Version:        1.0
+  Version:        2.0
   Author:         Chris Halstead - chalstead@vmware.com
   Creation Date:  4/8/2019
-  Purpose/Change: Initial script development
+  Purpose/Change: Added App Volumes 4.x script
   **This script and the App Volumes API is not supported by VMware**
   New sizes won't be reflected until a user logs in and attaches the Writable Volume	
+
+------
+
+**Expand-WV-2x.ps1 is for App Volumes 2.x**
+
+**Expand-WV-4x.ps1 is for App Volumes 4.x**
+
+------
 
 .EXAMPLE
  .\Expand-WV.ps1 
