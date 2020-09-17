@@ -13,7 +13,7 @@ Batch Expand VMware App Volumes Writable Volumes
   Creation Date:  9/17/2020 <br />
   Purpose/Change: Added App Volumes 4.x script<br/>
 
-  **This script and the App Volumes API is not supported by VMware**<br />
+  **This script and the App Volumes API are not supported by VMware**<br />
 
 ** New sizes won't be reflected until a user logs in and attaches the Writable Volume**
 
