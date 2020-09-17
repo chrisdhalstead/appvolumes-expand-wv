@@ -9,12 +9,14 @@
   Log file stored in %temp%\expand-wv.log>
 
 .NOTES
-  Version:        1.0
+  Version:        2.0
   Author:         Chris Halstead - chalstead@vmware.com
-  Creation Date:  4/8/2019
-  Purpose/Change: Initial script development
+  Creation Date:  9/17/2020
+  Purpose/Change: Update for App Volumes 4.x
   **This script and the App Volumes API is not supported by VMware**
   New sizes won't be reflected until a user logs in and attaches the Writable Volume	
+
+  **Only for App Volumes 4.x**
   
 .EXAMPLE
  .\Expand-WV.ps1 
@@ -24,9 +26,10 @@
         -AppVolumesPassword "SecurePassword" 
         -New_Size_In_MB "40960" 
         -Update_WV_Size "yes" 
+                
 
     .PARAMETER AppVolumesServerFQDN
-    The FQDN of the App Volumes Manager where you want to view / change the Writable Volumes
+    The FQDN of the 4.x App Volumes Manager where you want to view / change the Writable Volumes
 
     .PARAMETER AppVolumesDomain
     Active Directory Domain of the user with Administrative access
@@ -42,6 +45,7 @@
 
     .PARAMETER Update_WV_Size
     Enter yes to update the sizes.  Type anything else for a list of writable volumes.
+    
 #>
 
 [CmdletBinding()]
@@ -58,12 +62,14 @@
 
         [Parameter(Mandatory=$True)]
         [securestring]$AppVolumesPassword,
-       
+
         [Parameter(Mandatory=$true)]
         [string]$New_Size_In_MB,
 
         [Parameter(Mandatory=$true)]
         [string]$Update_WV_Size
+           
+       
 
 )
 
@@ -119,9 +125,9 @@ write-Log -Message "Enumerating Writable Volumes"
 Write-Host "Enumerating Writable Volumes"
 
 #Get Writable Volumes
-$sgetwv = Invoke-RestMethod -WebSession $avsession -Method Get -Uri "https://$AppVolumesServerFQDN/cv_api/writables" -ContentType 'application/json'
+$sgetwv = Invoke-RestMethod -WebSession $avsession -Method Get -Uri "https://$AppVolumesServerFQDN/app_volumes/writables" -ContentType 'application/json'
 
-$json = $sgetwv.datastores.writable_volumes
+$json = $sgetwv.data
 
     foreach ($item in $json)
     {

@@ -14,7 +14,9 @@
   Creation Date:  4/8/2019
   Purpose/Change: Initial script development
   **This script and the App Volumes API is not supported by VMware**
-  New sizes won't be reflected until a user logs in and attaches the Writable Volume	
+  New sizes won't be reflected until a user logs in and attaches the Writable Volume
+  
+  **Only for App Volumes 2.x**
   
 .EXAMPLE
  .\Expand-WV.ps1 
