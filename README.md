@@ -2,7 +2,7 @@
 Batch Expand Size of VMware App Volumes Writable Volumes
 
 .INPUTS
-  Parameters Below
+  Parameters Below 
 
 .OUTPUTS
   Log file stored in %temp%\expand-wv.log>
